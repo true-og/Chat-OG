@@ -1,43 +1,67 @@
-import java.io.BufferedReader
+/* This is free and unencumbered software released into the public domain */
 
+/* ------------------------------ Plugins ------------------------------ */
 plugins {
-    kotlin("jvm") version "2.1.21" // Import kotlin jvm plugin for kotlin/java integration.
-    id("com.diffplug.spotless") version "7.0.4" // Import auto-formatter.
-    id("com.gradleup.shadow") version "8.3.6" // Import shadow API.
-    eclipse // Import eclipse plugin for IDE integration.
+    id("java") // Import Java plugin.
+    id("java-library") // Import Java Library plugin.
+    id("com.diffplug.spotless") version "7.0.4" // Import Spotless plugin.
+    id("com.gradleup.shadow") version "8.3.6" // Import Shadow plugin.
+    eclipse // Import Eclipse plugin.
+    kotlin("jvm") version "2.1.21" // Import Kotlin JVM plugin.
 }
 
-val commitHash =
-    Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short=10", "HEAD")).let { process ->
-        process.waitFor()
-        val output = process.inputStream.use { it.bufferedReader().use(BufferedReader::readText) }
-        process.destroy()
-        output.trim()
+/* --------------------------- JDK / Kotlin ---------------------------- */
+java {
+    sourceCompatibility = JavaVersion.VERSION_17 // Compile with JDK 17 compatibility.
+    toolchain { // Select Java toolchain.
+        languageVersion.set(JavaLanguageVersion.of(17)) // Use JDK 17.
+        vendor.set(JvmVendorSpec.GRAAL_VM) // Use GraalVM CE.
     }
-
-val apiVersion = "1.19"
-
-group = "nl.skbotnl.chatog"
-
-version = "$apiVersion-$commitHash"
-
-repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    maven { url = uri("https://repo.purpurmc.org/snapshots") }
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/") }
-    maven { url = uri("https://repo.essentialsx.net/releases/") }
 }
 
+kotlin { jvmToolchain(17) }
+
+/* ----------------------------- Metadata ------------------------------ */
+val commitHash: String =
+    providers.exec { commandLine("git", "rev-parse", "--short=10", "HEAD") }.standardOutput.asText.get().trim()
+
+group = "nl.skbotnl.chatog" // Declare bundle identifier.
+
+val apiVersion = "1.19" // Declare minecraft server target version.
+
+version = "$apiVersion-$commitHash" // Declare plugin version (will be in .jar).
+
+/* ----------------------------- Resources ----------------------------- */
+tasks.named<ProcessResources>("processResources") {
+    val props = mapOf("version" to version, "apiVersion" to apiVersion)
+    inputs.properties(props) // Indicates to rerun if version changes.
+    filesMatching("plugin.yml") { expand(props) }
+    from("LICENSE") { into("/") } // Bundle licenses into jarfiles.
+}
+
+/* ---------------------------- Repos ---------------------------------- */
+repositories {
+    mavenCentral() // Import the Maven Central Maven Repository.
+    gradlePluginPortal() // Import the Gradle Plugin Portal Maven Repository.
+    maven { url = uri("https://repo.purpurmc.org/snapshots") } // Import the PurpurMC Maven Repository.
+    maven { url = uri("https://jitpack.io") } // Import the Jitpack Maven Repository.
+    maven {
+        url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+    } // Import the PlaceholderAPI Maven repository.
+    maven { url = uri("https://repo.essentialsx.net/releases/") } // Import the EssentialsX Maven Repository.
+}
+
+/* ---------------------- Java project deps ---------------------------- */
 dependencies {
-    compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-    compileOnly("me.clip:placeholderapi:2.11.6")
-    compileOnly("net.essentialsx:EssentialsX:2.21.0")
-    compileOnly(files("libs/AnnouncerPlus-1.4.1.jar"))
-    compileOnly(project(":libs:Utilities-OG"))
-    compileOnly("net.luckperms:api:5.5")
+    compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") // Import Vault API (internally deprecated).
+    compileOnly("me.clip:placeholderapi:2.11.6") // Import Placeholder API (internally deprecated).
+    compileOnly("net.essentialsx:EssentialsX:2.21.0") // Import EssentialsX API (internally deprecated).
+    compileOnly(
+        files("libs/AnnouncerPlus-1.4.1.jar")
+    ) // Import AnnouncerPlus API (binary-compatible with AnnouncerPlus-OG API).
+    compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
+    compileOnly("net.luckperms:api:5.5") // Import LuckPerms API.
 
     implementation("net.dv8tion:JDA:5.5.1")
     implementation("club.minnced:jda-ktx:0.12.0")
@@ -54,20 +78,13 @@ configurations.all {
     exclude(group = "io.projectreactor")
 }
 
-java {
-    // Declare java version.
-    sourceCompatibility = JavaVersion.VERSION_17
+/* ---------------------- Reproducible jars ---------------------------- */
+tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible .jars
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
 }
 
-kotlin { jvmToolchain(17) }
-
-tasks.build {
-    dependsOn(tasks.spotlessApply)
-    dependsOn(tasks.shadowJar)
-}
-
-tasks.jar { archiveClassifier.set("part") }
-
+/* ----------------------------- Shadow -------------------------------- */
 tasks.shadowJar {
     archiveClassifier.set("") // Use empty string instead of null.
     exclude("io.github.miniplaceholders.*") // Exclude the MiniPlaceholders package from being shadowed.
@@ -75,30 +92,25 @@ tasks.shadowJar {
     minimize()
 }
 
-tasks.named<ProcessResources>("processResources") {
-    val props = mapOf("version" to version, "apiVersion" to apiVersion)
-    inputs.properties(props)
-    filteringCharset = "UTF-8"
-    filesMatching("plugin.yml") { expand(props) }
-    from("LICENSE") { into("/") }
+tasks.jar { archiveClassifier.set("part") } // Applies to root jarfile only.
+
+tasks.build { dependsOn(tasks.spotlessApply, tasks.shadowJar) } // Build depends on spotless and shadow.
+
+/* --------------------------- Javac opts ------------------------------- */
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:deprecation") // Trigger deprecation warning messages.
+    options.encoding = "UTF-8" // Use UTF-8 file encoding.
 }
 
-tasks.withType<AbstractArchiveTask>().configureEach {
-    isPreserveFileTimestamps = false
-    isReproducibleFileOrder = true
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-        vendor = JvmVendorSpec.GRAAL_VM
-    }
-}
-
+/* ----------------------------- Auto Formatting ------------------------ */
 spotless {
     kotlin { ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) } }
     kotlinGradle {
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        target("build.gradle.kts", "settings.gradle.kts")
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) } // JetBrains Kotlin formatting.
+        target("build.gradle.kts", "settings.gradle.kts") // Gradle files to format.
     }
+}
+
+tasks.named("spotlessCheck") {
+    dependsOn("spotlessApply") // Run spotless before checking if spotless ran.
 }
