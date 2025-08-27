@@ -15,6 +15,7 @@ internal class StaffChat : CommandExecutor {
             sender.sendMessage("You can only execute this command as a player.")
             return true
         }
+
         if (!sender.hasPermission("chat-og.staff")) {
             sender.sendMessage(
                 UtilitiesOG.trueogColorize(
@@ -23,12 +24,13 @@ internal class StaffChat : CommandExecutor {
             )
             return true
         }
+
         if (args == null || args.isEmpty()) {
             if (ChatSystem.inChat[sender.uniqueId] == ChatType.STAFF_CHAT) {
                 ChatSystem.inChat[sender.uniqueId] = ChatType.GENERAL_CHAT
 
                 sender.sendMessage(
-                    UtilitiesOG.trueogColorize("${config.prefix}<reset>: You are now talking in normal chat.")
+                    UtilitiesOG.trueogColorize("${config.prefix}<reset>: You are now talking in general chat.")
                 )
                 return true
             }

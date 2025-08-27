@@ -29,8 +29,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
-import nl.skbotnl.chatog.Helper.convertMentions
-import nl.skbotnl.chatog.Helper.stripGroupMentions
+import nl.skbotnl.chatog.ChatUtil.convertMentions
+import nl.skbotnl.chatog.ChatUtil.recolorComponent
+import nl.skbotnl.chatog.ChatUtil.stripGroupMentions
 import nl.skbotnl.chatog.commands.TranslateMessage
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -40,6 +41,7 @@ internal class DiscordBridge private constructor() {
     private lateinit var webhook: WebhookClient
     private var staffWebhook: WebhookClient? = null
     private var premiumWebhook: WebhookClient? = null
+    private var developerWebhook: WebhookClient? = null
 
     companion object {
         fun create(): DiscordBridge? {
@@ -71,6 +73,17 @@ internal class DiscordBridge private constructor() {
                 }
             } else if (config.premiumDiscordEnabled) {
                 ChatOG.plugin.logger.warning("You have enabled premium Discord but have not set up the premium webhook")
+            }
+            if (config.developerWebhook != null) {
+                try {
+                    discordBridge.developerWebhook = WebhookClient.withUrl(config.developerWebhook!!)
+                } catch (_: IllegalArgumentException) {
+                    ChatOG.plugin.logger.warning("Config option \"developer\" is invalid")
+                }
+            } else if (config.premiumDiscordEnabled) {
+                ChatOG.plugin.logger.warning(
+                    "You have enabled developer Discord but have not set up the developer webhook"
+                )
             }
 
             if (config.botToken == null) {
@@ -162,7 +175,8 @@ internal class DiscordBridge private constructor() {
                 if (
                     it.channel.id != config.channelId &&
                         (if (config.staffDiscordEnabled) it.channel.id != config.staffChannelId else true) &&
-                        (if (config.premiumDiscordEnabled) it.channel.id != config.premiumChannelId else true)
+                        (if (config.premiumDiscordEnabled) it.channel.id != config.premiumChannelId else true) &&
+                        (if (config.developerDiscordEnabled) it.channel.id != config.developerChannelId else true)
                 ) {
                     return@listener
                 }
@@ -185,6 +199,7 @@ internal class DiscordBridge private constructor() {
 
                 val roles = member.roles
                 val topRole = roles.maxByOrNull { role -> role.positionRaw }
+                val sortedRoles = member.roles.sortedByDescending { role -> role.positionRaw }
 
                 val discordComponent = Component.text("Discord: ").color(TextColor.color(88, 101, 242))
                 val userComponent: TextComponent =
@@ -198,13 +213,7 @@ internal class DiscordBridge private constructor() {
                     if (config.roles.isEmpty()) {
                         NamedTextColor.GRAY
                     } else {
-                        val roleId =
-                            message.guild
-                                .getRoleById(
-                                    config.roles
-                                        .filter { role -> topRole!!.id == message.guild.getRoleById(role)?.id }[0]
-                                )
-                                ?.id
+                        val roleId = sortedRoles.first { role -> role.id in config.roles }?.id
                         if (roleId != null) {
                             val roleColor = config.roleMessageColor[roleId]
 
@@ -216,7 +225,19 @@ internal class DiscordBridge private constructor() {
                         } else NamedTextColor.GRAY
                     }
 
-                val messageComponents = mutableListOf<Component>(Component.text(">"))
+                val suffix =
+                    if (config.rolesWithSuffixes.isEmpty()) {
+                        ">"
+                    } else {
+                        val roleId = sortedRoles.first { role -> role.id in config.rolesWithSuffixes }?.id
+                        if (roleId != null) {
+                            config.roleSuffix[roleId]!!
+                        } else {
+                            ">"
+                        }
+                    }
+
+                val messageComponents = mutableListOf<Component>(UtilitiesOG.trueogColorize(suffix))
 
                 val attachmentComponents = mutableListOf<Component>()
 
@@ -243,19 +264,30 @@ internal class DiscordBridge private constructor() {
                     }
                 }
 
+                val useColor =
+                    if (config.useColorCodeRoles) {
+                        roles.any { role -> role.id in config.colorCodeRoles }
+                    } else {
+                        true
+                    }
+
                 if (message.contentDisplay != "") {
                     messageComponents +=
-                        Helper.processText(
+                        recolorComponent(
+                            ChatUtil.processText(
                                 EmojiConverter.replaceEmojisWithNames(message.contentDisplay),
                                 "@${user.name}",
-                            )
-                            ?.color(messageColor) ?: return@listener
+                                useColor,
+                            ) ?: return@listener,
+                            messageColor,
+                        )
                 }
 
                 val contentComponent =
                     Component.join(
                         JoinConfiguration.separator(Component.text(" ")),
-                        messageComponents + attachmentComponents,
+                        Component.join(JoinConfiguration.noSeparators(), messageComponents),
+                        Component.join(JoinConfiguration.noSeparators(), attachmentComponents),
                     )
 
                 var replyComponent = Component.text("")
@@ -291,6 +323,18 @@ internal class DiscordBridge private constructor() {
                                 JoinConfiguration.noSeparators(),
                                 discordComponent,
                                 premiumComponent,
+                                replyComponent,
+                                userComponent,
+                                contentComponent,
+                            )
+                        }
+
+                        config.developerChannelId -> {
+                            val developerComponent = Component.text("DEVELOPER | ").color(NamedTextColor.AQUA)
+                            Component.join(
+                                JoinConfiguration.noSeparators(),
+                                discordComponent,
+                                developerComponent,
                                 replyComponent,
                                 userComponent,
                                 contentComponent,
@@ -351,7 +395,7 @@ internal class DiscordBridge private constructor() {
                         message.contentDisplay,
                         member.effectiveName,
                         Component.join(JoinConfiguration.noSeparators(), discordComponent, userComponent),
-                        Component.text("> "),
+                        Component.text("$suffix "),
                     )
             }
             return discordBridge
@@ -381,7 +425,7 @@ internal class DiscordBridge private constructor() {
     suspend fun sendMessage(message: String, player: Player) {
         val webhookMessage =
             WebhookMessageBuilder()
-                .setUsername(UtilitiesOG.stripFormatting(ChatHelper.getPlayerPartString(player)))
+                .setUsername(UtilitiesOG.stripFormatting(ChatUtil.getPlayerPartString(player)))
                 .setContent(UtilitiesOG.stripFormatting(stripGroupMentions(convertMentions(message))))
                 .setAvatarUrl("https://minotar.net/helm/${player.uniqueId}.png")
 
@@ -433,6 +477,24 @@ internal class DiscordBridge private constructor() {
             }
 
         premiumWebhook!!.send(webhookMessage.build())
+    }
+
+    suspend fun sendDeveloperMessage(message: String, name: String, uuid: UUID?) {
+        if (!config.developerDiscordEnabled) return
+
+        if (developerWebhook == null) {
+            ChatOG.plugin.logger.warning("developerWebhook has not been set or is invalid")
+            return
+        }
+
+        val webhookMessage =
+            WebhookMessageBuilder().apply {
+                setUsername(UtilitiesOG.stripFormatting(name))
+                setContent(UtilitiesOG.stripFormatting(stripGroupMentions((convertMentions(message)))))
+                if (uuid != null) setAvatarUrl("https://minotar.net/helm/$uuid.png")
+            }
+
+        developerWebhook!!.send(webhookMessage.build())
     }
 
     fun sendEmbed(message: String, uuid: UUID?, color: Int?) {

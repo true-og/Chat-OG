@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 
 class BlocklistManager {
     private val lock = Any()
-    private var blockList = mutableListOf<String>()
+    private val blockList = mutableListOf<String>()
 
     init {
         ChatOG.plugin.logger.info("Loading the blocklists...")
@@ -24,14 +24,13 @@ class BlocklistManager {
 
     private fun refresh() {
         blockList.clear()
-        URI("https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/multi.txt")
-            .toURL()
-            .openStream()
-            .use { input ->
+        ChatOG.config.blocklists.forEach { blocklist ->
+            URI(blocklist).toURL().openStream().use { input ->
                 input.bufferedReader().use { bufferedReader ->
                     synchronized(lock) { bufferedReader.lines().forEach { if (!it.startsWith("#")) blockList.add(it) } }
                 }
             }
+        }
     }
 
     private val urlRegex = Regex("(?:https?://)?([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})")

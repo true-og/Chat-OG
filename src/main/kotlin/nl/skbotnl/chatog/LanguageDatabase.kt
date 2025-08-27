@@ -33,4 +33,8 @@ internal class LanguageDatabase {
         commands.set("chatog:language:$uuid", language)
         connection.close()
     }
+
+    fun shutdown() {
+        redisClient.shutdown()
+    }
 }

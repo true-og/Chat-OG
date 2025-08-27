@@ -9,7 +9,7 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
 import nl.skbotnl.chatog.ChatOG.Companion.lastMessagedMap
-import nl.skbotnl.chatog.Helper
+import nl.skbotnl.chatog.ChatUtil
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -57,7 +57,7 @@ internal class PrivateMessage : CommandExecutor {
         TranslateMessage.pmMessages[randomUUID] =
             TranslateMessage.SentPMMessage(message, sender.uniqueId, toPlayer.uniqueId)
 
-        val messageComponent = Helper.processText(message, sender)
+        val messageComponent = ChatUtil.processText(message, sender)
         if (messageComponent == null) {
             return true
         }

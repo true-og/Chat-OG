@@ -20,6 +20,12 @@ commands:
   chatconfigreload:
     description: Reload Chat-OG's config
     usage: /chatconfigreload
+  gc:
+    description: Toggle or talk in general chat
+    usage: /gc OR /gc <message here>
+  g:
+    description: Toggle or talk in general chat
+    usage: /g OR /g <message here>
   sc:
     description: Toggle or talk in staff chat
     usage: /sc OR /sc <message here>
@@ -28,10 +34,16 @@ commands:
     usage: /s OR /s <message here>
   pc:
     description: Toggle or talk in premium chat
-    usage: /p OR /p <message here>
+    usage: /pc OR /pc <message here>
   p:
     description: Toggle or talk in premium chat
     usage: /p OR /p <message here>
+  dc:
+    description: Toggle or talk in developer chat
+    usage: /dc OR /dc <message here>
+  d:
+    description: Toggle or talk in developer chat
+    usage: /d OR /d <message here>
   msg:
     description: Send a private message to a player
     usage: /msg <player name> <message>

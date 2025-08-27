@@ -9,8 +9,8 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
-import nl.skbotnl.chatog.Helper
-import nl.skbotnl.chatog.Helper.legacyToMm
+import nl.skbotnl.chatog.ChatUtil
+import nl.skbotnl.chatog.ChatUtil.legacyToMm
 import nl.skbotnl.chatog.PlayerAffix
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
@@ -56,7 +56,7 @@ internal class TranslateMessage : CommandExecutor {
         }
         val player: Player = sender
 
-        if (Helper.getTranslateTimeout(player.uniqueId) != 0L) {
+        if (ChatUtil.getTranslateTimeout(player.uniqueId) != 0L) {
             player.sendMessage(UtilitiesOG.trueogColorize("${config.prefix}<reset>: <red>You're doing that too fast."))
             return true
         }

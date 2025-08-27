@@ -21,8 +21,7 @@ import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
 import nl.skbotnl.chatog.ChatOG.Companion.discordBridgeLock
 import nl.skbotnl.chatog.ChatSystem.ChatType
-import nl.skbotnl.chatog.Helper.legacyToMm
-import nl.skbotnl.chatog.Helper.removeColor
+import nl.skbotnl.chatog.ChatUtil.legacyToMm
 import nl.skbotnl.chatog.commands.TranslateMessage
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -43,7 +42,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatHelper.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player)
 
         ChatOG.scope.launch {
             discordBridgeLock.read {
@@ -67,12 +66,12 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatHelper.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player)
 
         ChatOG.scope.launch {
             discordBridgeLock.read {
                 ChatOG.discordBridge?.sendEmbed(
-                    "${removeColor(playerPartString)} has left the game. ${
+                    "$playerPartString has left the game. ${
                         Bukkit.getOnlinePlayers().count() - 1
                     } player(s) online.",
                     event.player.uniqueId,
@@ -91,14 +90,14 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatHelper.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player)
 
         val reason = PlainTextComponentSerializer.plainText().serialize(event.reason())
 
         ChatOG.scope.launch {
             discordBridgeLock.read {
                 ChatOG.discordBridge?.sendEmbed(
-                    "${removeColor(playerPartString)} was kicked with reason: \"${reason}\". ${
+                    "$playerPartString was kicked with reason: \"${reason}\". ${
                         Bukkit.getOnlinePlayers().count() - 1
                     } player(s) online.",
                     event.player.uniqueId,
@@ -117,7 +116,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatHelper.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player)
 
         val advancementTitleKey = event.advancement.display?.title() ?: return
         val advancementTitle = PlainTextComponentSerializer.plainText().serialize(advancementTitleKey)
@@ -135,7 +134,7 @@ internal class Events : Listener {
         ChatOG.scope.launch {
             discordBridgeLock.read {
                 ChatOG.discordBridge?.sendEmbed(
-                    "${removeColor(playerPartString)} $advancementMessage.",
+                    "$playerPartString $advancementMessage.",
                     event.player.uniqueId,
                     0xFFFF00,
                 )
@@ -169,23 +168,30 @@ internal class Events : Listener {
 
         val eventMessage = event.message() as TextComponent
 
-        if (ChatSystem.inChat[event.player.uniqueId] == ChatType.STAFF_CHAT) {
-            ChatSystem.sendMessageInStaffChat(event.player, eventMessage.content())
-            return
-        }
-        if (ChatSystem.inChat[event.player.uniqueId] == ChatType.PREMIUM_CHAT) {
-            ChatSystem.sendMessageInPremiumChat(event.player, eventMessage.content())
-            return
+        when (ChatSystem.inChat[event.player.uniqueId]) {
+            ChatType.STAFF_CHAT -> {
+                ChatSystem.sendMessageInStaffChat(event.player, eventMessage.content())
+                return
+            }
+            ChatType.PREMIUM_CHAT -> {
+                ChatSystem.sendMessageInPremiumChat(event.player, eventMessage.content())
+                return
+            }
+            ChatType.DEVELOPER_CHAT -> {
+                ChatSystem.sendMessageInDeveloperChat(event.player, eventMessage.content())
+                return
+            }
+            else -> {}
         }
 
-        val discordMessageString = Helper.convertEmojis(eventMessage.content())
+        val discordMessageString = ChatUtil.convertEmojis(eventMessage.content())
         ChatOG.scope.launch {
             discordBridgeLock.read { ChatOG.discordBridge?.sendMessage(discordMessageString, event.player) }
         }
 
-        val playerPart = ChatHelper.getPlayerPart(event.player, true)
+        val playerPart = ChatUtil.getPlayerPart(event.player, true)
 
-        val messageComponent = Helper.processText(eventMessage.content(), event.player)
+        val messageComponent = ChatUtil.processText(eventMessage.content(), event.player)
         if (messageComponent == null) {
             return
         }
@@ -207,6 +213,8 @@ internal class Events : Listener {
 
         event.viewers().forEach { it.sendMessage(textComponent) }
 
+        ChatUtil.dingForMentions(event.player.uniqueId, messageComponent)
+
         TranslateMessage.chatMessages[randomUUID] =
             TranslateMessage.SentChatMessage(eventMessage.content(), event.player)
     }
@@ -224,7 +232,7 @@ internal class Events : Listener {
             ChatOG.scope.launch {
                 discordBridgeLock.read {
                     ChatOG.discordBridge?.sendEmbed(
-                        removeColor((event.deathMessage() as TextComponent).content()),
+                        (event.deathMessage() as TextComponent).content(),
                         event.player.uniqueId,
                         0xFF0000,
                     )
@@ -254,7 +262,7 @@ internal class Events : Listener {
 
         ChatOG.scope.launch {
             discordBridgeLock.read {
-                ChatOG.discordBridge?.sendEmbed(removeColor(translatedDeathMessage), event.player.uniqueId, 0xFF0000)
+                ChatOG.discordBridge?.sendEmbed(translatedDeathMessage, event.player.uniqueId, 0xFF0000)
             }
         }
     }

@@ -19,7 +19,7 @@ internal class ChatOG : JavaPlugin() {
 
         lateinit var plugin: JavaPlugin
         lateinit var config: Config
-        lateinit var blocklistManager: BlocklistManager
+        var blocklistManager: BlocklistManager? = null
         lateinit var luckPerms: LuckPerms
         lateinit var languageDatabase: LanguageDatabase
         var translator: OpenAI? = null
@@ -27,6 +27,8 @@ internal class ChatOG : JavaPlugin() {
         val discordBridgeLock = ReentrantReadWriteLock()
         var essentials = Bukkit.getServer().pluginManager.getPlugin("Essentials") as Essentials
         var lastMessagedMap: MutableMap<UUID, UUID> = HashMap()
+
+        fun isLanguageDatabaseInitialized() = ::languageDatabase.isInitialized
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -40,18 +42,20 @@ internal class ChatOG : JavaPlugin() {
                     return
                 }
 
-        blocklistManager = BlocklistManager()
+        if (Companion.config.blocklistEnabled) {
+            blocklistManager = BlocklistManager()
+        }
 
         translator =
             if (Companion.config.openAIEnabled) {
                 if (Companion.config.openAIBaseUrl == null) {
                     this.logger.warning(
-                        "You have enabled OpenAI but have not set up the base url, not enabling the translator"
+                        "You have enabled OpenAI translation but have not set up the base url, not enabling the translator"
                     )
                     null
                 } else if (Companion.config.openAIApiKey == null) {
                     this.logger.warning(
-                        "You have enabled OpenAI but have not set up the api key, not enabling the translator"
+                        "You have enabled OpenAI translation but have not set up the api key, not enabling the translator"
                     )
                     null
                 } else {
@@ -81,10 +85,14 @@ internal class ChatOG : JavaPlugin() {
         this.getCommand("translatesettings")?.setExecutor(TranslateSettings())
         this.getCommand("translatesettings")?.tabCompleter = TranslateSettingsTabCompleter()
         this.getCommand("chatconfigreload")?.setExecutor(ChatConfigReload())
+        this.getCommand("gc")?.setExecutor(GeneralChat())
+        this.getCommand("g")?.setExecutor(GeneralChat())
         this.getCommand("sc")?.setExecutor(StaffChat())
         this.getCommand("s")?.setExecutor(StaffChat())
         this.getCommand("pc")?.setExecutor(PremiumChat())
         this.getCommand("p")?.setExecutor(PremiumChat())
+        this.getCommand("dc")?.setExecutor(DeveloperChat())
+        this.getCommand("d")?.setExecutor(DeveloperChat())
         this.getCommand("msg")?.setExecutor(PrivateMessage())
         this.getCommand("whisper")?.setExecutor(PrivateMessage())
         this.getCommand("pm")?.setExecutor(PrivateMessage())
@@ -100,7 +108,7 @@ internal class ChatOG : JavaPlugin() {
     }
 
     override fun onDisable() {
-        if (Companion.config.discordEnabled) {
+        if (discordBridge != null) {
             discordBridgeLock.read {
                 val discordBridge = discordBridge
                 val serverHasStoppedMessage =
@@ -115,6 +123,10 @@ internal class ChatOG : JavaPlugin() {
                 discordBridge!!.sendMessageWithBot(serverHasStoppedMessage)
                 discordBridge.shutdownNow()
             }
+        }
+
+        if (isLanguageDatabaseInitialized()) {
+            languageDatabase.shutdown()
         }
 
         scope.cancel()
