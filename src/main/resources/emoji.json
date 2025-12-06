@@ -360,6 +360,10 @@
     "name": "flushed_face"
   },
   {
+    "char": "🫪",
+    "name": "distorted_face"
+  },
+  {
     "char": "🥺",
     "name": "pleading_face"
   },
@@ -670,6 +674,10 @@
   {
     "char": "💢",
     "name": "anger_symbol"
+  },
+  {
+    "char": "🫯",
+    "name": "fight_cloud"
   },
   {
     "char": "💥",
@@ -1972,6 +1980,10 @@
     "name": "troll"
   },
   {
+    "char": "🫈",
+    "name": "hairy_creature"
+  },
+  {
     "char": "💆",
     "name": "person_getting_massage"
   },
@@ -2318,6 +2330,10 @@
   {
     "char": "🏃‍♂‍➡",
     "name": "man_running_facing_right"
+  },
+  {
+    "char": "🧑‍🩰",
+    "name": "ballet_dancer"
   },
   {
     "char": "💃",
@@ -3412,6 +3428,10 @@
     "name": "dolphin"
   },
   {
+    "char": "🫍",
+    "name": "orca"
+  },
+  {
     "char": "🦭",
     "name": "seal"
   },
@@ -4242,6 +4262,10 @@
   {
     "char": "⛰",
     "name": "mountain"
+  },
+  {
+    "char": "🛘",
+    "name": "landslide"
   },
   {
     "char": "🌋",
@@ -5936,6 +5960,14 @@
     "name": "saxophone"
   },
   {
+    "char": "🎺",
+    "name": "trumpet"
+  },
+  {
+    "char": "🪊",
+    "name": "trombone"
+  },
+  {
     "char": "🪗",
     "name": "accordion"
   },
@@ -5946,10 +5978,6 @@
   {
     "char": "🎹",
     "name": "musical_keyboard"
-  },
-  {
-    "char": "🎺",
-    "name": "trumpet"
   },
   {
     "char": "🎻",
@@ -6236,12 +6264,16 @@
     "name": "label"
   },
   {
+    "char": "🪙",
+    "name": "coin"
+  },
+  {
     "char": "💰",
     "name": "money_bag"
   },
   {
-    "char": "🪙",
-    "name": "coin"
+    "char": "🪎",
+    "name": "treasure_chest"
   },
   {
     "char": "💴",
