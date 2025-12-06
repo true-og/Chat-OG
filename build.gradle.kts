@@ -86,6 +86,8 @@ tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible .ja
 /* ----------------------------- Shadow -------------------------------- */
 tasks.shadowJar {
     archiveClassifier.set("") // Use empty string instead of null.
+    isEnableRelocation = true
+    relocationPrefix = "${project.group}.shadow"
     exclude("io.github.miniplaceholders.*") // Exclude the MiniPlaceholders package from being shadowed.
     exclude("natives/**")
     minimize()
