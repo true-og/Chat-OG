@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const https = require('https')
 
-const EMOJI_VERSION = '16.0'
+const EMOJI_VERSION = '17.0.0'
 
 main()
 
@@ -40,7 +40,7 @@ async function main () {
 }
 
 async function getTestFile (ver) {
-  const url = `https://unicode.org/Public/emoji/${ver}/emoji-test.txt`
+  const url = `https://unicode.org/Public/${ver}/emoji/emoji-test.txt`
 
   process.stdout.write(`Fetch emoji-test.txt (v${EMOJI_VERSION})`)
   return new Promise((resolve, reject) => {
