@@ -63,19 +63,18 @@ dependencies {
     compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
     compileOnly("net.luckperms:api:5.5") // Import LuckPerms API.
 
-    implementation("net.dv8tion:JDA:5.5.1")
+    implementation("net.dv8tion:JDA:6.1.2")
     implementation("club.minnced:jda-ktx:0.12.0")
     implementation("club.minnced:discord-webhooks:0.8.4")
-    implementation("com.google.code.gson:gson:2.13.1")
-    implementation("io.lettuce:lettuce-core:6.7.1.RELEASE")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("io.lettuce:lettuce-core:7.2.0.RELEASE")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
 }
 
 configurations.all {
     exclude(group = "com.google.crypto.tink", module = "tink")
     exclude(group = "net.java", module = "opus-java")
-    exclude(group = "io.projectreactor")
 }
 
 /* ---------------------- Reproducible jars ---------------------------- */
