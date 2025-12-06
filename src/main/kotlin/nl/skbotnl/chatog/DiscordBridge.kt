@@ -78,9 +78,9 @@ internal class DiscordBridge private constructor() {
                 try {
                     discordBridge.developerWebhook = WebhookClient.withUrl(config.developerWebhook!!)
                 } catch (_: IllegalArgumentException) {
-                    ChatOG.plugin.logger.warning("Config option \"developer\" is invalid")
+                    ChatOG.plugin.logger.warning("Config option \"developerWebhook\" is invalid")
                 }
-            } else if (config.premiumDiscordEnabled) {
+            } else if (config.developerDiscordEnabled) {
                 ChatOG.plugin.logger.warning(
                     "You have enabled developer Discord but have not set up the developer webhook"
                 )
