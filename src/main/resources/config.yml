@@ -9,51 +9,53 @@ blocklists:
 
 # ---Redis---
 # Redis URL according to https://redis.github.io/lettuce/user-guide/connecting-redis/#uri-syntax
-redisUrl: 127.0.0.1:6379/0
+redisUrl: redis://$KEYDB_PASSWORD@127.0.0.1:6379/0
 
+TODO: Enable translation.
 # ---OpenAI API Translation---
 # Any OpenAI-compatible (OpenAI, ollama, llama.cpp) API will work here
 openAIEnabled: false
 # Will be used as: <baseurl>/v1/...
 baseUrl: http://127.0.0.1:8080
-apiKey: verySecretKey
+apiKey: $OPENAI_API_KEY
 # The name of the model. This isn't always required, for example with the llama-server "example" from llama.cpp
 model: ""
 
 # ---Discord---
 # discordEnabled needs to be true for staffDiscordEnabled and premiumDiscordEnabled to have any effect
-discordEnabled: false
-staffDiscordEnabled: false
-premiumDiscordEnabled: false
-developerDiscordEnabled: false
-status: Minecraft
-serverHasStartedMessage: The server has started
-serverHasStoppedMessage: The server has stopped
-botToken: <put the bot token here>
-guildId: <put the id of the guild here>
-channelId: <put the id of the channel here>
-staffChannelId: <put the id of the channel here>
-premiumChannelId: <put the id of the channel here>
-developerChannelId: <put the id of the channel here>
-webhook: <put the webhook here>
-staffWebhook: <put the webhook url here>
-premiumWebhook: <put the webhook url here>
-developerWebhook: <put the webhook url here>
+discordEnabled: true
+staffDiscordEnabled: true
+premiumDiscordEnabled: true
+developerDiscordEnabled: true
+status: Minecraft 1.19.4
+serverHasStartedMessage: $BRAND_NAME 1.19.4 Beta 2 Server has started! <:stonks:899680228216029195>
+serverHasStoppedMessage: $BRAND_NAME 1.19.4 Beta 2 Server has stopped! <:notstonks:939288625701617665>
+botToken: $DISCORD_BOT_TOKEN
+guildId: $DISCORD_GUILD_ID
+channelId: $DISCORD_CHANNEL_ID
+staffChannelId: $DISCORD_STAFF_ID
+premiumChannelId: $DISCORD_PREMIUM_ID
+developerChannelId: $DISCORD_DEVELOPER_ID
+webhook: $DISCORD_MAIN_WEBHOOK
+staffWebhook: $DISCORD_STAFF_WEBHOOK
+premiumWebhook: $DISCORD_PREMIUM_WEBOOK
+developerWebhook: $DISCORD_DEVELOPER_WEBHOOK
 listCommandName: list
 # Available placeholders: %onlineplayers%, %maxplayers%
-listCommandText: "%onlineplayers% player(s) online:"
+listCommandText: "There are %onlineplayers% out of maximum 200 players online."
 
+# TODO: Configure these roles.
 useColorCodeRoles: false
 # Configure which roles can use color codes with Discord -> Minecraft
 # For example:
 #
-# colorCodeRoles: [1234567891234567890, 0987654321987654321]
+# colorCodeRoles: [1234567891274567890, 0987654321983654321]
 
 # Configure the text color (after the username (Discord -> Minecraft)) for certain roles
 # For example:
 #
 # roles:
-#     1234567891234567890:
+#     1234567891239567890:
 #         message_color: RED
 #
 # message_color can be one of the following: BLACK, DARK_BLUE, DARK_GREEN, DARK_AQUA, DARK_RED, DARK_PURPLE, GOLD, GRAY, DARK_GRAY, BLUE, GREEN, AQUA, RED, LIGHT_PURPLE, YELLOW, WHITE
@@ -68,5 +70,5 @@ useColorCodeRoles: false
 # For example:
 
 # roleSuffixes:
-#     1234567891234567890:
+#     1234567891234527890:
 #         suffix: ": "
