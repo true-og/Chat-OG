@@ -38,7 +38,7 @@ premiumChannelId: $DISCORD_PREMIUM_ID
 developerChannelId: $DISCORD_DEVELOPER_ID
 webhook: $DISCORD_MAIN_WEBHOOK
 staffWebhook: $DISCORD_STAFF_WEBHOOK
-premiumWebhook: $DISCORD_PREMIUM_WEBOOK
+premiumWebhook: $DISCORD_PREMIUM_WEBHOOK
 developerWebhook: $DISCORD_DEVELOPER_WEBHOOK
 listCommandName: list
 # Available placeholders: %onlineplayers%, %maxplayers%

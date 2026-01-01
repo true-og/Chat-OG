@@ -99,6 +99,8 @@ tasks.build { dependsOn(tasks.spotlessApply, tasks.shadowJar) } // Build depends
 
 /* --------------------------- Javac opts ------------------------------- */
 tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-parameters") // Enable reflection for java code.
+    options.isFork = true // Run javac in its own process.
     options.compilerArgs.add("-Xlint:deprecation") // Trigger deprecation warning messages.
     options.encoding = "UTF-8" // Use UTF-8 file encoding.
 }
