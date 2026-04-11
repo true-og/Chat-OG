@@ -12,7 +12,11 @@ object Config {
 
     fun loadConfig(): ConfigModel? {
         return try {
-            configMapper.readValue(File(plugin.dataFolder, "config.yml"), ConfigModel::class.java)
+            val file = File(plugin.dataFolder, "config.yml")
+            if (!file.exists()) {
+                plugin.saveDefaultConfig()
+            }
+            configMapper.readValue(file, ConfigModel::class.java)
         } catch (e: ValueInstantiationException) {
             if (e.cause !is NullPointerException) throw e
             // Hacky but seems to be the only way
@@ -26,7 +30,7 @@ object Config {
             )
             null
         } catch (e: JacksonException) {
-            plugin.logger.severe("Something went wrong while loading the config:\n${e.message}")
+            plugin.logger.severe("Something went wrong while loading the config (${e::class.simpleName}):\n${e.message}")
             null
         }
     }
