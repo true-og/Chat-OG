@@ -12,6 +12,7 @@ blocklist:
 # ---Redis---
 redis:
   host: 127.0.0.1
+  password: ^{KEYDB_PASSWORD}
   port: 6379
   database: 0
 
