@@ -30,7 +30,9 @@ object Config {
             )
             null
         } catch (e: JacksonException) {
-            plugin.logger.severe("Something went wrong while loading the config (${e::class.simpleName}):\n${e.message}")
+            plugin.logger.severe(
+                "Something went wrong while loading the config (${e::class.simpleName}):\n${e.message}"
+            )
             null
         }
     }
