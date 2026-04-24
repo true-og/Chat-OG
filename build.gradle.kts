@@ -54,7 +54,6 @@ repositories {
 /* ---------------------- Java project deps ---------------------------- */
 dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") // Import Vault API (internally deprecated).
     compileOnly("me.clip:placeholderapi:2.11.6") // Import Placeholder API (internally deprecated).
     compileOnly("net.essentialsx:EssentialsX:2.21.0") // Import EssentialsX API (internally deprecated).
     compileOnly(
