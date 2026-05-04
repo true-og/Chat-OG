@@ -12,7 +12,7 @@ internal object PlayerAffix {
 
     fun getSuffix(uuid: UUID): String {
         val suffix = getMetaData(uuid).suffix ?: return ""
-        return legacyToMm(suffix) + " "
+        return legacyToMm(suffix).trimEnd()
     }
 
     private fun getMetaData(uuid: UUID) =
