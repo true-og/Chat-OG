@@ -1,11 +1,12 @@
 package nl.skbotnl.chatog
 
+import de.myzelyam.api.vanish.PlayerVanishStateChangeEvent
+import de.myzelyam.api.vanish.VanishAPI
 import io.papermc.paper.advancement.AdvancementDisplay.Frame.*
 import io.papermc.paper.event.player.AsyncChatEvent
 import kotlin.concurrent.read
 import kotlinx.coroutines.launch
 import me.clip.placeholderapi.PlaceholderAPI
-import net.ess3.api.events.VanishStatusChangeEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
@@ -16,7 +17,6 @@ import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
 import nl.skbotnl.chatog.ChatOG.Companion.discordBridge
 import nl.skbotnl.chatog.ChatOG.Companion.discordBridgeLock
-import nl.skbotnl.chatog.ChatOG.Companion.essentials
 import nl.skbotnl.chatog.ChatOG.Companion.scope
 import nl.skbotnl.chatog.util.ChatUtil
 import nl.skbotnl.chatog.util.ChatUtil.legacyToMm
@@ -39,7 +39,7 @@ internal class Events : Listener {
         if (!config.discord.enabled) {
             return
         }
-        if (essentials.getUser(event.player).isVanished && event.joinMessage() !is TextComponent) {
+        if (VanishAPI.isVanished(event.player) && event.joinMessage() !is TextComponent) {
             return
         }
 
@@ -63,7 +63,7 @@ internal class Events : Listener {
         if (!config.discord.enabled) {
             return
         }
-        if (essentials.getUser(event.player).isVanished) {
+        if (VanishAPI.isVanished(event.player)) {
             return
         }
 
@@ -87,7 +87,7 @@ internal class Events : Listener {
         if (!config.discord.enabled) {
             return
         }
-        if (essentials.getUser(event.player).isVanished) {
+        if (VanishAPI.isVanished(event.player)) {
             return
         }
 
@@ -113,7 +113,7 @@ internal class Events : Listener {
         if (!config.discord.enabled) {
             return
         }
-        if (essentials.getUser(event.player).isVanished) {
+        if (VanishAPI.isVanished(event.player)) {
             return
         }
 
@@ -172,7 +172,7 @@ internal class Events : Listener {
         if (!config.discord.enabled) {
             return
         }
-        if (essentials.getUser(event.player).isVanished) {
+        if (VanishAPI.isVanished(event.player)) {
             return
         }
 
@@ -191,8 +191,8 @@ internal class Events : Listener {
 
         var nameString = "${PlayerAffix.getPrefix(event.player.uniqueId)}${event.player.name}"
 
-        if (PlaceholderAPI.setPlaceholders(event.player, "%simpleclans_clan_color_tag%") != "") {
-            nameString = PlaceholderAPI.setPlaceholders(event.player, "&8[%simpleclans_clan_color_tag%&8] $nameString")
+        if (PlaceholderAPI.setPlaceholders(event.player, "%simpleclans_union_color_tag%") != "") {
+            nameString = PlaceholderAPI.setPlaceholders(event.player, "&8[%simpleclans_union_color_tag%&8] $nameString")
         }
         val nameComponent = UtilitiesOG.trueogColorize(legacyToMm(nameString))
 
@@ -214,22 +214,19 @@ internal class Events : Listener {
     }
 
     @EventHandler
-    fun onVanish(event: VanishStatusChangeEvent) {
-        if (event.value) {
+    fun onVanish(event: PlayerVanishStateChangeEvent) {
+        val player = event.player ?: return
+        if (event.isVanishing) {
             val playerQuitEvent =
                 PlayerQuitEvent(
-                    event.affected.base,
-                    Component.translatable(
-                        "multiplayer.player.left",
-                        NamedTextColor.YELLOW,
-                        event.affected.base.displayName(),
-                    ),
+                    player,
+                    Component.translatable("multiplayer.player.left", NamedTextColor.YELLOW, player.displayName()),
                     PlayerQuitEvent.QuitReason.DISCONNECTED,
                 )
             JoinQuitListener().onQuit(playerQuitEvent)
             onQuit(playerQuitEvent)
         } else {
-            val playerJoinEvent = PlayerJoinEvent(event.affected.base, Component.text(""))
+            val playerJoinEvent = PlayerJoinEvent(player, Component.text(""))
             JoinQuitListener().onJoin(playerJoinEvent)
             onJoin(playerJoinEvent)
         }

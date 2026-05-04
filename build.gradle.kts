@@ -27,7 +27,7 @@ val commitHash: String =
 
 group = "nl.skbotnl.chatog" // Declare bundle identifier.
 
-val apiVersion = "1.19" // Declare plugin version (will be in .jar).
+val apiVersion = "1.19" // Declare API version.
 
 version = "$apiVersion-$commitHash" // Declare plugin version (will be in .jar).
 
@@ -60,8 +60,8 @@ dependencies {
         files("libs/AnnouncerPlus-1.4.1.jar")
     ) // Import AnnouncerPlus API (binary-compatible with AnnouncerPlus-OG API).
     compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
+    compileOnlyApi(project(":libs:Vanish-OG")) // Import TrueOG Network Vanish-OG Java API (from source).
     compileOnly("net.luckperms:api:5.5") // Import LuckPerms API.
-
     implementation("tools.jackson.core:jackson-databind:3.1.1")
     implementation("tools.jackson.dataformat:jackson-dataformat-yaml:3.1.1")
 

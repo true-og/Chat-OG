@@ -21,7 +21,7 @@ internal object PlayerAffix {
             user = luckPerms.userManager.loadUser(uuid).get()
         }
         val prefixNode = user.nodes.singleOrNull { node -> node.key.startsWith("suffix.1.") }
-        if (prefixNode == null) return "> "
+        if (prefixNode == null) return ""
         return legacyToMm(prefixNode.key.split(".").last()) + " "
     }
 }
