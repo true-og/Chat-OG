@@ -6,22 +6,18 @@ import nl.skbotnl.chatog.util.ChatUtil.legacyToMm
 
 internal object PlayerAffix {
     fun getPrefix(uuid: UUID): String {
-        var user = luckPerms.userManager.getUser(uuid)
-        if (user == null) {
-            user = luckPerms.userManager.loadUser(uuid).get()
-        }
-        val prefixNode = user.nodes.singleOrNull { node -> node.key.startsWith("prefix.1.") }
-        if (prefixNode == null) return ""
-        return legacyToMm(prefixNode.key.split(".").last()) + " "
+        val prefix = getMetaData(uuid).prefix ?: return ""
+        return legacyToMm(prefix).trimEnd() + " "
     }
 
     fun getSuffix(uuid: UUID): String {
-        var user = luckPerms.userManager.getUser(uuid)
-        if (user == null) {
-            user = luckPerms.userManager.loadUser(uuid).get()
-        }
-        val prefixNode = user.nodes.singleOrNull { node -> node.key.startsWith("suffix.1.") }
-        if (prefixNode == null) return ""
-        return legacyToMm(prefixNode.key.split(".").last()) + " "
+        val suffix = getMetaData(uuid).suffix ?: return ""
+        return legacyToMm(suffix) + " "
     }
+
+    private fun getMetaData(uuid: UUID) =
+        with(luckPerms.userManager.getUser(uuid) ?: luckPerms.userManager.loadUser(uuid).join()) {
+            val queryOptions = luckPerms.contextManager.getQueryOptions(this).orElse(queryOptions)
+            cachedData.getMetaData(queryOptions)
+        }
 }
