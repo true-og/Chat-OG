@@ -29,9 +29,9 @@ internal object ChatUtil {
     fun getPlayerPartString(player: Player): String {
         var playerPart = "${PlayerAffix.getPrefix(player.uniqueId)}${player.name}"
 
-        val clanColorTag = PlaceholderAPI.setPlaceholders(player, "%simpleclans_clan_color_tag%")
-        if (clanColorTag.isNotEmpty() && clanColorTag != "None") {
-            playerPart = "&8[$clanColorTag&8] $playerPart"
+        val unionColorTag = PlaceholderAPI.setPlaceholders(player, "%simpleclans_clan_color_tag%")
+        if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
+            playerPart = "&8[$unionColorTag&8] $playerPart"
         }
 
         return playerPart

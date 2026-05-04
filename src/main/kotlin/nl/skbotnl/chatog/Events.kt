@@ -192,7 +192,7 @@ internal class Events : Listener {
         var nameString = "${PlayerAffix.getPrefix(event.player.uniqueId)}${event.player.name}"
 
         val unionColorTag = PlaceholderAPI.setPlaceholders(event.player, "%simpleclans_union_color_tag%")
-        if (unionColorTag.isNotEmpty() && unionColorTag != "None") {
+        if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
             nameString = "&8[$unionColorTag&8] $nameString"
         }
         val nameComponent = UtilitiesOG.trueogColorize(legacyToMm(nameString))

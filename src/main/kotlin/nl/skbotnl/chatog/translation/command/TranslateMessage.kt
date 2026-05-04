@@ -142,9 +142,9 @@ internal class TranslateMessage : CommandExecutor {
                     "${PlayerAffix.getPrefix(sentChatMessage.player.uniqueId)}${sentChatMessage.player.name} ${
                         PlayerAffix.getSuffix(sentChatMessage.player.uniqueId)
                     }"
-                val clanColorTag = PlaceholderAPI.setPlaceholders(sentMessage.player, "%simpleclans_clan_color_tag%")
-                if (clanColorTag.isNotEmpty() && clanColorTag != "None") {
-                    playerString = "&8[$clanColorTag&8] $playerString"
+                val unionColorTag = PlaceholderAPI.setPlaceholders(sentMessage.player, "%simpleclans_clan_color_tag%")
+                if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
+                    playerString = "&8[$unionColorTag&8] $playerString"
                 }
                 val playerComponent =
                     UtilitiesOG.trueogColorize(
