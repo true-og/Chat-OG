@@ -6,7 +6,6 @@ import io.papermc.paper.advancement.AdvancementDisplay.Frame.*
 import io.papermc.paper.event.player.AsyncChatEvent
 import kotlin.concurrent.read
 import kotlinx.coroutines.launch
-import me.clip.placeholderapi.PlaceholderAPI
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
@@ -191,7 +190,9 @@ internal class Events : Listener {
 
         var nameString = "${PlayerAffix.getPrefix(event.player.uniqueId)}${event.player.name}"
 
-        val unionColorTag = PlaceholderAPI.setPlaceholders(event.player, "%simpleclans_union_color_tag%")
+        val unionColorTag =
+            PlainTextComponentSerializer.plainText()
+                .serialize(UtilitiesOG.trueogExpand("<simpleclans_union_color_tag>", event.player))
         if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
             nameString = "&8[$unionColorTag&8] $nameString"
         }

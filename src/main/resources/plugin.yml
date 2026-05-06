@@ -4,7 +4,6 @@ main: nl.skbotnl.chatog.ChatOG
 author: SKBotNL
 api-version: '${apiVersion}'
 depend:
-  - PlaceholderAPI
   - LuckPerms
   - AnnouncerPlus
   - Utilities-OG

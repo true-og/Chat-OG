@@ -3,7 +3,6 @@ package nl.skbotnl.chatog.util
 import dev.minn.jda.ktx.coroutines.await
 import java.util.*
 import kotlin.concurrent.read
-import me.clip.placeholderapi.PlaceholderAPI
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
@@ -29,9 +28,11 @@ internal object ChatUtil {
     fun getPlayerPartString(player: Player): String {
         var playerPart = "${PlayerAffix.getPrefix(player.uniqueId)}${player.name}"
 
-        val unionColorTag = PlaceholderAPI.setPlaceholders(player, "%simpleclans_clan_color_tag%")
+        val unionColorTag =
+            PlainTextComponentSerializer.plainText()
+                .serialize(UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", player))
         if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
-            playerPart = "&8[$unionColorTag&8] $playerPart"
+            playerPart = legacyToMm("&8[$unionColorTag&8] ") + playerPart
         }
 
         return playerPart

@@ -29,7 +29,7 @@ internal abstract class ChatSystem {
 
         val chatComponent =
             UtilitiesOG.trueogColorize(
-                ChatUtil.legacyToMm("$playerPartString <reset>${PlayerAffix.getSuffix(player.uniqueId)} &7> ")
+                ChatUtil.legacyToMm("$playerPartString<reset>${PlayerAffix.getSuffix(player.uniqueId)} &7> ")
             )
 
         var textComponent = Component.join(JoinConfiguration.noSeparators(), chatComponent, messageComponent)

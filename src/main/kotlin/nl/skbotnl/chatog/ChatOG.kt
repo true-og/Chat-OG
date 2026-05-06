@@ -30,7 +30,18 @@ import org.bukkit.plugin.java.JavaPlugin
 
 internal class ChatOG : JavaPlugin() {
     companion object {
-        val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+        val scope =
+            CoroutineScope(
+                Dispatchers.Default +
+                    SupervisorJob() +
+                    CoroutineExceptionHandler { _, throwable ->
+                        val logger = if (::plugin.isInitialized) plugin.logger else Bukkit.getLogger()
+                        logger.severe(
+                            "Uncaught exception in Chat-OG coroutine: ${throwable.javaClass.simpleName}: ${throwable.message}"
+                        )
+                        throwable.printStackTrace()
+                    }
+            )
 
         lateinit var plugin: JavaPlugin
         lateinit var config: ConfigModel

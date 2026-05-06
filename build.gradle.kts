@@ -45,16 +45,12 @@ repositories {
     gradlePluginPortal() // Import the Gradle Plugin Portal Maven Repository.
     maven { url = uri("https://repo.purpurmc.org/snapshots") } // Import the PurpurMC Maven Repository.
     maven { url = uri("https://jitpack.io") } // Import the Jitpack Maven Repository.
-    maven {
-        url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-    } // Import the PlaceholderAPI Maven repository.
     maven { url = uri("https://repo.essentialsx.net/releases/") } // Import the EssentialsX Maven Repository.
 }
 
 /* ---------------------- Java project deps ---------------------------- */
 dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
-    compileOnly("me.clip:placeholderapi:2.11.6") // Import Placeholder API (internally deprecated).
     compileOnly("net.essentialsx:EssentialsX:2.21.0") // Import EssentialsX API (internally deprecated).
     compileOnly(
         files("libs/AnnouncerPlus-1.4.1.jar")
