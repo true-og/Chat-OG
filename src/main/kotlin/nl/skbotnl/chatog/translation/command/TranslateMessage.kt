@@ -10,7 +10,7 @@ import nl.skbotnl.chatog.ChatOG.Companion.languageDatabase
 import nl.skbotnl.chatog.ChatOG.Companion.translator
 import nl.skbotnl.chatog.util.ChatUtil
 import nl.skbotnl.chatog.util.ChatUtil.legacyToMm
-import nl.skbotnl.chatog.util.PlayerAffix
+import nl.skbotnl.chatog.util.PlayerUtils
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -137,9 +137,10 @@ internal class TranslateMessage : CommandExecutor {
         when (messageType) {
             1 -> {
                 val sentChatMessage = sentMessage as SentChatMessage
+                // TODO: Should use ChatUtil.getPlayerPartString
                 var playerString =
-                    "${PlayerAffix.getPrefix(sentChatMessage.player.uniqueId)}${sentChatMessage.player.name}${
-                        PlayerAffix.getSuffix(sentChatMessage.player.uniqueId)
+                    "${PlayerUtils.getPrefix(sentChatMessage.player.uniqueId)}${sentChatMessage.player.name}${
+                        PlayerUtils.getSuffix(sentChatMessage.player.uniqueId)
                     }"
                 val unionColorTag = ChatUtil.fetchUnionColorTag(sentMessage.player)
                 val unionPlain = ChatUtil.stripFormatting(unionColorTag)

@@ -9,7 +9,7 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.translation.command.TranslateMessage
 import nl.skbotnl.chatog.util.ChatUtil
-import nl.skbotnl.chatog.util.PlayerAffix
+import nl.skbotnl.chatog.util.PlayerUtils
 import org.bukkit.entity.Player
 
 internal abstract class ChatSystem {
@@ -28,11 +28,12 @@ internal abstract class ChatSystem {
 
         sendDiscordMessage(text, discordPlayerPartString, player.uniqueId)
 
-        val messageComponent = ChatUtil.processText(text, player) ?: return
+        val messageComponent =
+            ChatUtil.processText(text, player)?.color(PlayerUtils.getMessageColor(player.uniqueId)) ?: return
 
         val chatComponent =
             UtilitiesOG.trueogColorize(
-                ChatUtil.legacyToMm("$playerPartString<reset>${PlayerAffix.getSuffix(player.uniqueId)} &7> ")
+                ChatUtil.legacyToMm("$playerPartString<reset>${PlayerUtils.getSuffix(player.uniqueId)} &7> ")
             )
 
         var textComponent = Component.join(JoinConfiguration.noSeparators(), chatComponent, messageComponent)

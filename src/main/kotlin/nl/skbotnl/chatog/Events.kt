@@ -19,8 +19,8 @@ import nl.skbotnl.chatog.ChatOG.Companion.discordBridgeLock
 import nl.skbotnl.chatog.ChatOG.Companion.scope
 import nl.skbotnl.chatog.util.ChatUtil
 import nl.skbotnl.chatog.util.ChatUtil.legacyToMm
-import nl.skbotnl.chatog.util.PlayerAffix
 import nl.skbotnl.chatog.util.PlayerExtensions.chatSystem
+import nl.skbotnl.chatog.util.PlayerUtils
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -188,7 +188,7 @@ internal class Events : Listener {
             return
         }
 
-        var nameString = "${PlayerAffix.getPrefix(event.player.uniqueId)}${event.player.name}"
+        var nameString = "${PlayerUtils.getPrefix(event.player.uniqueId)}${event.player.name}"
 
         val unionColorTag = ChatUtil.fetchUnionColorTag(event.player)
         val unionPlain = ChatUtil.stripFormatting(unionColorTag)

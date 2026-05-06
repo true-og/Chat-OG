@@ -29,7 +29,7 @@ import org.bukkit.entity.Player
 internal object ChatUtil {
     fun getPlayerPartString(player: Player, includeSuffix: Boolean = false): String {
         var playerPart =
-            "${PlayerAffix.getPrefix(player.uniqueId)}${player.name}${if (includeSuffix) PlayerAffix.getSuffix(player.uniqueId) else ""}"
+            "${PlayerUtils.getPrefix(player.uniqueId)}${player.name}${if (includeSuffix) PlayerUtils.getSuffix(player.uniqueId) else ""}"
 
         val unionColorTag = fetchUnionColorTag(player)
         val unionPlain = stripFormatting(unionColorTag)
