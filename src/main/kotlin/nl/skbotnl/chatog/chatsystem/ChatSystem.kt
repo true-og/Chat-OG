@@ -23,7 +23,10 @@ internal abstract class ChatSystem {
         var playerPartString = ChatUtil.getPlayerPartString(player)
         playerPartString = listOfNotNull(prefix, playerPartString).joinToString(" | ")
 
-        sendDiscordMessage(text, playerPartString, player.uniqueId)
+        val discordPlayerPartString =
+            listOfNotNull(prefix, ChatUtil.getDiscordPlayerPartString(player)).joinToString(" | ")
+
+        sendDiscordMessage(text, discordPlayerPartString, player.uniqueId)
 
         val messageComponent = ChatUtil.processText(text, player) ?: return
 

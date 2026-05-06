@@ -4,7 +4,6 @@ import java.util.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
 import nl.skbotnl.chatog.ChatOG.Companion.languageDatabase
@@ -142,10 +141,9 @@ internal class TranslateMessage : CommandExecutor {
                     "${PlayerAffix.getPrefix(sentChatMessage.player.uniqueId)}${sentChatMessage.player.name}${
                         PlayerAffix.getSuffix(sentChatMessage.player.uniqueId)
                     }"
-                val unionColorTag =
-                    PlainTextComponentSerializer.plainText()
-                        .serialize(UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", sentMessage.player))
-                if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
+                val unionColorTag = ChatUtil.fetchUnionColorTag(sentMessage.player)
+                val unionPlain = ChatUtil.stripFormatting(unionColorTag)
+                if (unionPlain.isNotEmpty() && unionPlain != "None") {
                     playerString = "&8[$unionColorTag&8] $playerString"
                 }
                 val playerComponent =
@@ -155,7 +153,6 @@ internal class TranslateMessage : CommandExecutor {
                         )
                     )
 
-                // Don't convert color in translated messages
                 translateMessage =
                     Component.join(
                         JoinConfiguration.noSeparators(),

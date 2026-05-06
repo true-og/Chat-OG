@@ -64,31 +64,53 @@ discord:
   listCommandText: "There are %onlineplayers% out of maximum 200 players online."
 
   # Color code roles
-  # TODO: Configure these roles.
-  useColorCodeRoles: false
-  # Configure which roles can use color codes with Discord -> Minecraft
-  # For example:
-  #
-  # colorCodeRoles: [1234567891274567890, 0987654321983654321]
+  # When true, only Discord users with one of the colorCodeRoles below can use
+  # Utilities-OG ColorCodeMap Bukkit codes (&c, &l, &*) or MiniMessage tags
+  # in Discord -> Minecraft chat. All others have their input stripped of
+  # formatting before it is rendered in-game.
+  useColorCodeRoles: true
 
-  # Configure the text color (after the username (Discord -> Minecraft)) for certain roles
-  # For example:
-  #
-  # roles:
-  #     1234567891239567890:
-  #         messageColor: red
-  #
-  # message_color can be one of the following: black, dark_blue, dark_green, dark_aqua, dark_red, dark_purple, gold, gray, dark_gray, blue, green, aqua, red, light_purple, yellow, white
-  #
-  # You can also use RGB for the color:
-  #
-  # roles:
-  #     1234567891234567890:
-  #         messageColor: [255, 255, 255]
+  # Discord role IDs allowed to use color codes from Discord.
+  colorCodeRoles:
+    - "897300356395073546" # OG-Pro
+    - "934876475285467247" # OG Master
+    - "897299946926125167" # Tester (same level as OG Master)
+    - "897299018407890945" # YouTube
+    - "1391741516204081162" # Technical Contributor
+    - "1096297706034569287" # Helper
+    - "897776965849858101" # Builder
+    - "916661431850639420" # MVP
+    - "1080912883694719047" # Developer
+    - "897297817574440970" # Moderator
+    - "897296878490763344" # Admin
 
-  # Configure the suffix for roles (has to include the space). color codes are allowed.
-  # For example:
-
-  # roleSuffixes:
-  #     1234567891234527890:
-  #         suffix: ": "
+  # Default Minecraft chat color applied to a Discord -> Minecraft message when
+  # the sender did not type their own color code. If a user has multiple
+  # configured roles the entry for their highest-positioned role wins.
+  roles:
+    "897657230575431710": # Member
+      messageColor: gray
+    "897300768619659314": # OG
+      messageColor: white
+    "897300356395073546": # OG-Pro
+      messageColor: white
+    "934876475285467247": # OG Master
+      messageColor: white
+    "897299946926125167": # Tester
+      messageColor: white
+    "897299018407890945": # YouTube
+      messageColor: white
+    "1391741516204081162": # Technical Contributor
+      messageColor: white
+    "1096297706034569287": # Helper
+      messageColor: white
+    "897776965849858101": # Builder
+      messageColor: white
+    "916661431850639420": # MVP
+      messageColor: white
+    "1080912883694719047": # Developer
+      messageColor: white
+    "897297817574440970": # Moderator
+      messageColor: white
+    "897296878490763344": # Admin
+      messageColor: white

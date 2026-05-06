@@ -1,6 +1,7 @@
 package nl.skbotnl.chatog.util
 
 import dev.minn.jda.ktx.coroutines.await
+import io.github.miniplaceholders.api.MiniPlaceholders
 import java.util.*
 import kotlin.concurrent.read
 import net.kyori.adventure.text.Component
@@ -9,6 +10,7 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.Context
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.minimessage.tag.PreProcess
 import net.kyori.adventure.text.minimessage.tag.Tag
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
@@ -25,17 +27,43 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 
 internal object ChatUtil {
-    fun getPlayerPartString(player: Player): String {
-        var playerPart = "${PlayerAffix.getPrefix(player.uniqueId)}${player.name}"
+    fun getPlayerPartString(player: Player, includeSuffix: Boolean = false): String {
+        var playerPart =
+            "${PlayerAffix.getPrefix(player.uniqueId)}${player.name}${if (includeSuffix) PlayerAffix.getSuffix(player.uniqueId) else ""}"
 
-        val unionColorTag =
-            PlainTextComponentSerializer.plainText()
-                .serialize(UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", player))
-        if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
+        val unionColorTag = fetchUnionColorTag(player)
+        val unionPlain = stripFormatting(unionColorTag)
+        if (unionPlain.isNotEmpty() && unionPlain != "None") {
             playerPart = legacyToMm("&8[$unionColorTag&8] ") + playerPart
         }
 
         return playerPart
+    }
+
+    fun getDiscordPlayerPartString(player: Player): String {
+        return getPlayerPartString(player, includeSuffix = true)
+    }
+
+    fun fetchUnionColorTag(player: Player): String {
+        var captured = ""
+        val original = MiniPlaceholders.getAudiencePlaceholders(player)
+        val capturingResolver =
+            object : TagResolver {
+                override fun resolve(name: String, arguments: ArgumentQueue, ctx: Context): Tag? {
+                    val tag = original.resolve(name, arguments, ctx) ?: return null
+                    if (tag is PreProcess) {
+                        captured = tag.value().replace('§', '&')
+                        return Tag.preProcessParsed("")
+                    }
+                    return tag
+                }
+
+                override fun has(name: String): Boolean = original.has(name)
+            }
+        val resolver =
+            TagResolver.builder().resolver(MiniPlaceholders.getGlobalPlaceholders()).resolver(capturingResolver).build()
+        MiniMessage.miniMessage().deserialize("<simpleclans_clan_color_tag>", resolver)
+        return captured
     }
 
     val mentionRegex = Regex("@([A-Za-z0-9_]{3,16})")
@@ -100,6 +128,10 @@ internal object ChatUtil {
 
     fun legacyToMm(text: String): String {
         return legacyRegex.replace(text) { legacyToMmMap[it.groupValues[1].lowercase()] ?: it.value }
+    }
+
+    fun stripFormatting(text: String): String {
+        return MiniMessage.miniMessage().stripTags(legacyRegex.replace(text, ""))
     }
 
     private val getHandle = Regex("@([a-z0-9_.]{2,32})")
@@ -170,8 +202,10 @@ internal object ChatUtil {
 
     private fun processText(text: String, player: Player?, username: String?, color: Boolean): Component? {
         val words: MutableList<String> = mutableListOf()
+        val canUseFormatting = player?.hasPermission("chat-og.color") == true || color
+        val textToProcess = if (canUseFormatting) legacyToMm(text) else stripFormatting(text)
 
-        legacyToMm(text).split(" ").forEach { word ->
+        textToProcess.split(" ").forEach { word ->
             val url = urlRegex.find(word)
 
             if (url != null) {
@@ -206,14 +240,10 @@ internal object ChatUtil {
             }
         }
 
-        return if (player?.hasPermission("chat-og.color") == true) {
+        return if (canUseFormatting) {
             colorMm.deserialize(words.joinToString(" "))
         } else {
-            if (color) {
-                colorMm.deserialize(words.joinToString(" "))
-            } else {
-                noColorMm.deserialize(words.joinToString(" "))
-            }
+            noColorMm.deserialize(words.joinToString(" "))
         }
     }
 

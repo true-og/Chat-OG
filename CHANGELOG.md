@@ -2,10 +2,11 @@
 
 NotAlexNoyle 05/06/26:
 
-- Drop PlaceholderAPI dependency. Resolve Unions-OG union color tags
-  through MiniPlaceholders via Utilities-OG.
-- Forward more types of exceptions to the server console.
-- Tighten LuckPerms prefix/suffix spacing and trim handling.
+- Port all uses of PlaceholderAPI to MiniPlaceholders / Utilities-OG APIs.
+- Fix Unions-OG Union colors breaking MC -> Discord link.
+- Drop the per-Discord-role suffix configuration. Player suffixes shown in messages now come exclusively from each player's individual LuckPerms suffix.
+- Fix LuckPerms spacing so exactly one space appears between the player name and any prefix/suffix.
+- Configure Color Code Roles.
 
 NotAlexNoyle 05/04/26:
 

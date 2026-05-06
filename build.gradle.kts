@@ -58,6 +58,9 @@ dependencies {
     compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
     compileOnlyApi(project(":libs:Vanish-OG")) // Import TrueOG Network Vanish-OG Java API (from source).
     compileOnly("net.luckperms:api:5.5") // Import LuckPerms API.
+    compileOnly(
+        "io.github.miniplaceholders:miniplaceholders-api:2.2.3"
+    ) // Import MiniPlaceholders API for direct tag access.
     implementation("tools.jackson.core:jackson-databind:3.1.1")
     implementation("tools.jackson.dataformat:jackson-dataformat-yaml:3.1.1")
 
