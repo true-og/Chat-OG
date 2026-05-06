@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class DiscordConfig
 @JsonCreator
 constructor(
