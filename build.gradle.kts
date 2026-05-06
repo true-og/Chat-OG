@@ -51,7 +51,6 @@ repositories {
 /* ---------------------- Java project deps ---------------------------- */
 dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
-    compileOnly("net.essentialsx:EssentialsX:2.21.0") // Import EssentialsX API (internally deprecated).
     compileOnly(
         files("libs/AnnouncerPlus-1.4.1.jar")
     ) // Import AnnouncerPlus API (binary-compatible with AnnouncerPlus-OG API).

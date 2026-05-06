@@ -1,6 +1,5 @@
 package nl.skbotnl.chatog
 
-import com.earth2me.essentials.Essentials
 import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
@@ -51,7 +50,6 @@ internal class ChatOG : JavaPlugin() {
         var translator: OpenAITranslator? = null
         var discordBridge: DiscordBridge? = null
         val discordBridgeLock = ReentrantReadWriteLock()
-        var essentials = Bukkit.getServer().pluginManager.getPlugin("Essentials-OG") as Essentials
         var lastMessagedMap: MutableMap<UUID, UUID> = HashMap()
 
         fun isConfigInitialized() = ::config.isInitialized
