@@ -393,7 +393,7 @@ internal class DiscordBridge private constructor() {
     suspend fun sendMessage(message: String, player: Player) {
         val webhookMessage =
             WebhookMessageBuilder()
-                .setUsername(UtilitiesOG.stripFormatting(ChatUtil.getDiscordPlayerPartString(player)))
+                .setUsername(UtilitiesOG.stripFormatting(ChatUtil.getPlayerPartString(player, includeSuffix = true)))
                 .setContent(UtilitiesOG.stripFormatting(ChatUtil.stripGroupMentions(ChatUtil.convertMentions(message))))
                 .setAvatarUrl("https://minotar.net/helm/${player.uniqueId}.png")
 

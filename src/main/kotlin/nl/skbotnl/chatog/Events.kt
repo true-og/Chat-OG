@@ -42,7 +42,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getDiscordPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         scope.launch {
             discordBridgeLock.read {
@@ -66,7 +66,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getDiscordPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         scope.launch {
             discordBridgeLock.read {
@@ -90,7 +90,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getDiscordPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         val reason = PlainTextComponentSerializer.plainText().serialize(event.reason())
 
@@ -116,7 +116,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getDiscordPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         val advancementTitleKey = event.advancement.display?.title() ?: return
         val advancementTitle = PlainTextComponentSerializer.plainText().serialize(advancementTitleKey)
@@ -190,10 +190,10 @@ internal class Events : Listener {
 
         var nameString = "${PlayerUtils.getPrefix(event.player.uniqueId)}${event.player.name}"
 
-        val unionColorTag = ChatUtil.fetchUnionColorTag(event.player)
-        val unionPlain = ChatUtil.stripFormatting(unionColorTag)
-        if (unionPlain.isNotEmpty() && unionPlain != "None") {
-            nameString = "&8[$unionColorTag&8] $nameString"
+        val unionTag = UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", event.player)
+        val unionPlainTag = UtilitiesOG.stripFormatting(unionTag)
+        if (unionPlainTag.isNotEmpty() && unionPlainTag != "None") {
+            nameString = "&8[$unionTag&8] $nameString"
         }
         val nameComponent = UtilitiesOG.trueogColorize(legacyToMm(nameString))
 

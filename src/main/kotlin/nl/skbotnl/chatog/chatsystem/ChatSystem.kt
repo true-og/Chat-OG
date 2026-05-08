@@ -24,7 +24,7 @@ internal abstract class ChatSystem {
         playerPartString = listOfNotNull(prefix, playerPartString).joinToString(" | ")
 
         val discordPlayerPartString =
-            listOfNotNull(prefix, ChatUtil.getDiscordPlayerPartString(player)).joinToString(" | ")
+            listOfNotNull(prefix, ChatUtil.getPlayerPartString(player, includeSuffix = true)).joinToString(" | ")
 
         sendDiscordMessage(text, discordPlayerPartString, player.uniqueId)
 

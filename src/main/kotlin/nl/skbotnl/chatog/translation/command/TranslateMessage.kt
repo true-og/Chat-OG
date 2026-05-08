@@ -142,10 +142,10 @@ internal class TranslateMessage : CommandExecutor {
                     "${PlayerUtils.getPrefix(sentChatMessage.player.uniqueId)}${sentChatMessage.player.name}${
                         PlayerUtils.getSuffix(sentChatMessage.player.uniqueId)
                     }"
-                val unionColorTag = ChatUtil.fetchUnionColorTag(sentMessage.player)
-                val unionPlain = ChatUtil.stripFormatting(unionColorTag)
-                if (unionPlain.isNotEmpty() && unionPlain != "None") {
-                    playerString = "&8[$unionColorTag&8] $playerString"
+                val unionTag = UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", player)
+                val unionPlainTag = UtilitiesOG.stripFormatting(unionTag)
+                if (unionPlainTag.isNotEmpty() && unionPlainTag != "None") {
+                    playerString = "&8[$unionTag&8] $playerString"
                 }
                 val playerComponent =
                     UtilitiesOG.trueogColorize(

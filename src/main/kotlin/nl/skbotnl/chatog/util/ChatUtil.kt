@@ -1,7 +1,6 @@
 package nl.skbotnl.chatog.util
 
 import dev.minn.jda.ktx.coroutines.await
-import io.github.miniplaceholders.api.MiniPlaceholders
 import java.util.*
 import kotlin.concurrent.read
 import net.kyori.adventure.text.Component
@@ -10,7 +9,6 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.Context
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.minimessage.tag.PreProcess
 import net.kyori.adventure.text.minimessage.tag.Tag
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
@@ -31,39 +29,13 @@ internal object ChatUtil {
         var playerPart =
             "${PlayerUtils.getPrefix(player.uniqueId)}${player.name}${if (includeSuffix) PlayerUtils.getSuffix(player.uniqueId) else ""}"
 
-        val unionColorTag = fetchUnionColorTag(player)
-        val unionPlain = stripFormatting(unionColorTag)
-        if (unionPlain.isNotEmpty() && unionPlain != "None") {
-            playerPart = legacyToMm("&8[$unionColorTag&8] ") + playerPart
+        val unionTag = UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", player)
+        val unionPlainTag = UtilitiesOG.stripFormatting(unionTag)
+        if (unionPlainTag.isNotEmpty() && unionPlainTag != "None") {
+            playerPart = legacyToMm("&8[$unionTag&8] ") + playerPart
         }
 
         return playerPart
-    }
-
-    fun getDiscordPlayerPartString(player: Player): String {
-        return getPlayerPartString(player, includeSuffix = true)
-    }
-
-    fun fetchUnionColorTag(player: Player): String {
-        var captured = ""
-        val original = MiniPlaceholders.getAudiencePlaceholders(player)
-        val capturingResolver =
-            object : TagResolver {
-                override fun resolve(name: String, arguments: ArgumentQueue, ctx: Context): Tag? {
-                    val tag = original.resolve(name, arguments, ctx) ?: return null
-                    if (tag is PreProcess) {
-                        captured = tag.value().replace('§', '&')
-                        return Tag.preProcessParsed("")
-                    }
-                    return tag
-                }
-
-                override fun has(name: String): Boolean = original.has(name)
-            }
-        val resolver =
-            TagResolver.builder().resolver(MiniPlaceholders.getGlobalPlaceholders()).resolver(capturingResolver).build()
-        MiniMessage.miniMessage().deserialize("<simpleclans_clan_color_tag>", resolver)
-        return captured
     }
 
     val mentionRegex = Regex("@([A-Za-z0-9_]{3,16})")
