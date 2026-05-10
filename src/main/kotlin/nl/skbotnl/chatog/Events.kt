@@ -19,8 +19,8 @@ import nl.skbotnl.chatog.ChatOG.Companion.discordBridgeLock
 import nl.skbotnl.chatog.ChatOG.Companion.scope
 import nl.skbotnl.chatog.util.ChatUtil
 import nl.skbotnl.chatog.util.ChatUtil.legacyToMm
-import nl.skbotnl.chatog.util.PlayerAffix
 import nl.skbotnl.chatog.util.PlayerExtensions.chatSystem
+import nl.skbotnl.chatog.util.PlayerUtils
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -42,7 +42,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         scope.launch {
             discordBridgeLock.read {
@@ -66,7 +66,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         scope.launch {
             discordBridgeLock.read {
@@ -90,7 +90,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         val reason = PlainTextComponentSerializer.plainText().serialize(event.reason())
 
@@ -116,7 +116,7 @@ internal class Events : Listener {
             return
         }
 
-        val playerPartString = ChatUtil.getPlayerPartString(event.player)
+        val playerPartString = ChatUtil.getPlayerPartString(event.player, includeSuffix = true)
 
         val advancementTitleKey = event.advancement.display?.title() ?: return
         val advancementTitle = PlainTextComponentSerializer.plainText().serialize(advancementTitleKey)
@@ -188,13 +188,12 @@ internal class Events : Listener {
             return
         }
 
-        var nameString = "${PlayerAffix.getPrefix(event.player.uniqueId)}${event.player.name}"
+        var nameString = "${PlayerUtils.getPrefix(event.player.uniqueId)}${event.player.name}"
 
-        val unionColorTag =
-            PlainTextComponentSerializer.plainText()
-                .serialize(UtilitiesOG.trueogExpand("<simpleclans_union_color_tag>", event.player))
-        if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
-            nameString = "&8[$unionColorTag&8] $nameString"
+        val unionTag = UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", event.player)
+        val unionPlainTag = UtilitiesOG.stripFormatting(unionTag)
+        if (unionPlainTag.isNotEmpty() && unionPlainTag != "None") {
+            nameString = "&8[$unionTag&8] $nameString"
         }
         val nameComponent = UtilitiesOG.trueogColorize(legacyToMm(nameString))
 

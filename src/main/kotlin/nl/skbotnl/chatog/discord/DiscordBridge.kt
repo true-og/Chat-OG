@@ -187,12 +187,7 @@ internal class DiscordBridge private constructor() {
                             ?: NamedTextColor.GRAY
                     }
 
-                val suffix =
-                    if (config.discord.roleSuffixes.isEmpty()) {
-                        "> "
-                    } else {
-                        sortedRoles.firstNotNullOfOrNull { r -> config.discord.roleSuffixes[r.id] }?.suffix ?: "> "
-                    }
+                val suffix = " > "
 
                 val messageComponents = mutableListOf<Component>(UtilitiesOG.trueogColorize(suffix))
 
@@ -368,7 +363,7 @@ internal class DiscordBridge private constructor() {
                         message.contentDisplay,
                         member.effectiveName,
                         Component.join(JoinConfiguration.noSeparators(), discordComponent, userComponent),
-                        Component.text("$suffix "),
+                        Component.text(suffix),
                     )
             }
             return discordBridge
@@ -398,7 +393,7 @@ internal class DiscordBridge private constructor() {
     suspend fun sendMessage(message: String, player: Player) {
         val webhookMessage =
             WebhookMessageBuilder()
-                .setUsername(UtilitiesOG.stripFormatting(ChatUtil.getPlayerPartString(player)))
+                .setUsername(UtilitiesOG.stripFormatting(ChatUtil.getPlayerPartString(player, includeSuffix = true)))
                 .setContent(UtilitiesOG.stripFormatting(ChatUtil.stripGroupMentions(ChatUtil.convertMentions(message))))
                 .setAvatarUrl("https://minotar.net/helm/${player.uniqueId}.png")
 

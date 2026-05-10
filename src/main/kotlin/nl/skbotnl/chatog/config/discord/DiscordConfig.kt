@@ -23,7 +23,4 @@ constructor(
     @param:JsonProperty("useColorCodeRoles") val useColorCodeRoles: Boolean,
     @param:JsonProperty("colorCodeRoles") @field:JsonSetter(nulls = Nulls.AS_EMPTY) val colorCodeRoles: List<String>,
     @param:JsonProperty("roles") @field:JsonSetter(nulls = Nulls.AS_EMPTY) val roles: Map<String, DiscordRoleConfig>,
-    @param:JsonProperty("roleSuffixes")
-    @field:JsonSetter(nulls = Nulls.AS_EMPTY)
-    val roleSuffixes: Map<String, DiscordSuffixConfig>,
 )

@@ -4,14 +4,13 @@ import java.util.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
 import nl.skbotnl.chatog.ChatOG.Companion.languageDatabase
 import nl.skbotnl.chatog.ChatOG.Companion.translator
 import nl.skbotnl.chatog.util.ChatUtil
 import nl.skbotnl.chatog.util.ChatUtil.legacyToMm
-import nl.skbotnl.chatog.util.PlayerAffix
+import nl.skbotnl.chatog.util.PlayerUtils
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -138,15 +137,15 @@ internal class TranslateMessage : CommandExecutor {
         when (messageType) {
             1 -> {
                 val sentChatMessage = sentMessage as SentChatMessage
+                // TODO: Should use ChatUtil.getPlayerPartString
                 var playerString =
-                    "${PlayerAffix.getPrefix(sentChatMessage.player.uniqueId)}${sentChatMessage.player.name}${
-                        PlayerAffix.getSuffix(sentChatMessage.player.uniqueId)
+                    "${PlayerUtils.getPrefix(sentChatMessage.player.uniqueId)}${sentChatMessage.player.name}${
+                        PlayerUtils.getSuffix(sentChatMessage.player.uniqueId)
                     }"
-                val unionColorTag =
-                    PlainTextComponentSerializer.plainText()
-                        .serialize(UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", sentMessage.player))
-                if (unionColorTag.isNotEmpty() && unionColorTag != "&8None") {
-                    playerString = "&8[$unionColorTag&8] $playerString"
+                val unionTag = UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", player)
+                val unionPlainTag = UtilitiesOG.stripFormatting(unionTag)
+                if (unionPlainTag.isNotEmpty() && unionPlainTag != "None") {
+                    playerString = "&8[$unionTag&8] $playerString"
                 }
                 val playerComponent =
                     UtilitiesOG.trueogColorize(
@@ -155,7 +154,6 @@ internal class TranslateMessage : CommandExecutor {
                         )
                     )
 
-                // Don't convert color in translated messages
                 translateMessage =
                     Component.join(
                         JoinConfiguration.noSeparators(),

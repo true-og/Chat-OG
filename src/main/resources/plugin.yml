@@ -7,8 +7,7 @@ depend:
   - LuckPerms
   - AnnouncerPlus
   - Utilities-OG
-softdepend:
-  - Essentials-OG
+  - Vanish-OG
 commands:
   translatemessage:
     description: Internal command for translating messages
