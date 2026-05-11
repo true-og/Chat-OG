@@ -5,7 +5,7 @@ author: SKBotNL
 api-version: '${apiVersion}'
 depend:
   - LuckPerms
-  - AnnouncerPlus
+  - AnnouncerPlus-OG
   - Utilities-OG
   - Vanish-OG
 commands:
