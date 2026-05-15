@@ -11,6 +11,7 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.trueog.utilitiesog.UtilitiesOG
 import nl.skbotnl.chatog.ChatOG.Companion.config
@@ -190,7 +191,8 @@ internal class Events : Listener {
 
         var nameString = "${PlayerUtils.getPrefix(event.player.uniqueId)}${event.player.name}"
 
-        val unionTag = UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", event.player)
+        val unionTag =
+            MiniMessage.miniMessage().serialize(UtilitiesOG.trueogExpand("<simpleclans_clan_color_tag>", event.player))
         val unionPlainTag = UtilitiesOG.stripFormatting(unionTag)
         if (unionPlainTag.isNotEmpty() && unionPlainTag != "None") {
             nameString = "&8[$unionTag&8] $nameString"
