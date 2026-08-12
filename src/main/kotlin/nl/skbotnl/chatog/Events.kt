@@ -17,6 +17,8 @@ import nl.skbotnl.chatog.ChatOG.Companion.config
 import nl.skbotnl.chatog.ChatOG.Companion.discordBridge
 import nl.skbotnl.chatog.ChatOG.Companion.discordBridgeLock
 import nl.skbotnl.chatog.ChatOG.Companion.scope
+import nl.skbotnl.chatog.chatsystem.GeneralChatSystem
+import nl.skbotnl.chatog.chatsystem.WorldChatSystem
 import nl.skbotnl.chatog.util.ChatUtil
 import nl.skbotnl.chatog.util.ChatUtil.legacyToMm
 import nl.skbotnl.chatog.util.PlayerExtensions.chatSystem
@@ -25,6 +27,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerAdvancementDoneEvent
+import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -32,6 +35,42 @@ import org.bukkit.event.server.BroadcastMessageEvent
 import xyz.jpenilla.announcerplus.listener.JoinQuitListener
 
 internal class Events : Listener {
+    // The main world and its nether and end, taken from level-name rather than assumed to be "world".
+    private fun isMainWorld(worldName: String): Boolean {
+        val main = Bukkit.getWorlds().firstOrNull()?.name ?: return false
+        return worldName.equals(main, true) ||
+            worldName.equals("${main}_nether", true) ||
+            worldName.equals("${main}_the_end", true)
+    }
+
+    // A multi world game world reports to its own channel, the main world to general, anything else nowhere.
+    private fun reports(worldName: String, key: String?) = key != null || isMainWorld(worldName)
+
+    // A game channel counts only its own players, since the server total would mislead there.
+    private fun onlineCount(key: String?) =
+        if (key == null) Bukkit.getOnlinePlayers().count() else WorldChatSystem.playersForKey(key).size
+
+    // Count players in a specific world. For the standard main world trio ("world", "world_nether", "world_the_end"),
+    // return the server-wide online player count so Discord shows merged counts across all worlds.
+    private fun onlineCountInWorld(worldName: String): Int {
+        return if (
+            worldName.equals("world", ignoreCase = true) ||
+                worldName.equals("world_nether", ignoreCase = true) ||
+                worldName.equals("world_the_end", ignoreCase = true)
+        ) {
+            Bukkit.getOnlinePlayers().count()
+        } else {
+            Bukkit.getWorld(worldName)?.players?.size ?: 0
+        }
+    }
+
+    // Gets the lobby/game label for a world, e.g. "HB1 Lobby" or "HB1 Game".
+    private fun getGameLabel(worldName: String): String? {
+        val worldChatSystem = WorldChatSystem.forWorld(worldName) ?: return null
+        val type = if (worldName.endsWith("-hub", ignoreCase = true)) "Lobby" else "Game"
+        return "${worldChatSystem.id} $type"
+    }
+
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         if (!config.discord.enabled) {
@@ -41,18 +80,18 @@ internal class Events : Listener {
             return
         }
 
+        val worldName = event.player.world.name
+        val key = WorldChatSystem.keyForWorld(worldName)
+        if (!reports(worldName, key)) {
+            return
+        }
+
         val playerPartString = ChatUtil.getPlayerPartString(event.player)
+        val gameLabel = getGameLabel(worldName)?.let { " the $it" } ?: ""
+        val message = "$playerPartString has joined$gameLabel. ${onlineCountInWorld(worldName)} player(s) online."
 
         scope.launch {
-            discordBridgeLock.read {
-                discordBridge?.sendEmbed(
-                    "$playerPartString has joined the game. ${
-                        Bukkit.getOnlinePlayers().count()
-                    } player(s) online.",
-                    event.player.uniqueId,
-                    0x00FF00,
-                )
-            }
+            discordBridgeLock.read { discordBridge?.sendEmbed(message, event.player.uniqueId, 0x00FF00, key) }
         }
     }
 
@@ -65,17 +104,56 @@ internal class Events : Listener {
             return
         }
 
+        val worldName = event.player.world.name
+        val key = WorldChatSystem.keyForWorld(worldName)
+        if (!reports(worldName, key)) {
+            return
+        }
+
         val playerPartString = ChatUtil.getPlayerPartString(event.player)
+        val gameLabel = getGameLabel(worldName)?.let { " the $it" } ?: ""
+        val message = "$playerPartString has left$gameLabel. ${onlineCountInWorld(worldName) - 1} player(s) online."
+
+        scope.launch {
+            discordBridgeLock.read { discordBridge?.sendEmbed(message, event.player.uniqueId, 0xFF0000, key) }
+        }
+    }
+
+    // Game players are teleported in rather than connecting, so without this a game channel only sees leaves.
+    @EventHandler
+    fun onWorldChange(event: PlayerChangedWorldEvent) {
+        if (!config.discord.enabled) {
+            return
+        }
+        if (VanishAPI.isVanished(event.player)) {
+            return
+        }
+
+        // Only the game channels track a per world population; general counts the whole server, which
+        // a world change does not alter.
+        val fromKey = WorldChatSystem.keyForWorld(event.from.name)
+        val toKey = WorldChatSystem.keyForWorld(event.player.world.name)
+        if (fromKey == toKey) {
+            return
+        }
+
+        val playerPartString = ChatUtil.getPlayerPartString(event.player)
+        val fromGameLabel = getGameLabel(event.from.name)?.let { " the $it" } ?: ""
+        val toGameLabel = getGameLabel(event.player.world.name)?.let { " the $it" } ?: ""
+        val leftMessage =
+            fromKey?.let {
+                "$playerPartString has left$fromGameLabel. ${onlineCountInWorld(event.from.name)} player(s) online."
+            }
+        val joinedMessage =
+            toKey?.let {
+                "$playerPartString has joined$toGameLabel. ${onlineCountInWorld(event.player.world.name)} player(s) online."
+            }
 
         scope.launch {
             discordBridgeLock.read {
-                discordBridge?.sendEmbed(
-                    "$playerPartString has left the game. ${
-                        Bukkit.getOnlinePlayers().count() - 1
-                    } player(s) online.",
-                    event.player.uniqueId,
-                    0xFF0000,
-                )
+                if (leftMessage != null) discordBridge?.sendEmbed(leftMessage, event.player.uniqueId, 0xFF0000, fromKey)
+                if (joinedMessage != null)
+                    discordBridge?.sendEmbed(joinedMessage, event.player.uniqueId, 0x00FF00, toKey)
             }
         }
     }
@@ -89,20 +167,20 @@ internal class Events : Listener {
             return
         }
 
+        val worldName = event.player.world.name
+        val key = WorldChatSystem.keyForWorld(worldName)
+        if (!reports(worldName, key)) {
+            return
+        }
+
         val playerPartString = ChatUtil.getPlayerPartString(event.player)
 
         val reason = PlainTextComponentSerializer.plainText().serialize(event.reason())
+        val message =
+            "$playerPartString was kicked with reason: \"${reason}\". ${onlineCount(key) - 1} player(s) online."
 
         scope.launch {
-            discordBridgeLock.read {
-                discordBridge?.sendEmbed(
-                    "$playerPartString was kicked with reason: \"${reason}\". ${
-                        Bukkit.getOnlinePlayers().count() - 1
-                    } player(s) online.",
-                    event.player.uniqueId,
-                    0xFF0000,
-                )
-            }
+            discordBridgeLock.read { discordBridge?.sendEmbed(message, event.player.uniqueId, 0xFF0000, key) }
         }
     }
 
@@ -112,6 +190,12 @@ internal class Events : Listener {
             return
         }
         if (VanishAPI.isVanished(event.player)) {
+            return
+        }
+
+        val worldName = event.player.world.name
+        val key = WorldChatSystem.keyForWorld(worldName)
+        if (!reports(worldName, key)) {
             return
         }
 
@@ -132,7 +216,7 @@ internal class Events : Listener {
 
         scope.launch {
             discordBridgeLock.read {
-                discordBridge?.sendEmbed("$playerPartString $advancementMessage.", event.player.uniqueId, 0xFFFF00)
+                discordBridge?.sendEmbed("$playerPartString $advancementMessage.", event.player.uniqueId, 0xFFFF00, key)
             }
         }
     }
@@ -161,9 +245,15 @@ internal class Events : Listener {
         if (event.isCancelled) return
         event.isCancelled = true
 
+        val worldName = event.player.world.name
+
         scope.launch {
             val eventMessage = event.message() as TextComponent
-            event.player.chatSystem.sendMessage(eventMessage.content(), event.player)
+            val chatSystem = event.player.chatSystem
+            // A multi world game world replaces general chat only, so staff, premium and developer stay global.
+            val effective =
+                if (chatSystem === GeneralChatSystem) WorldChatSystem.forWorld(worldName) ?: chatSystem else chatSystem
+            effective.sendMessage(eventMessage.content(), event.player)
         }
     }
 
@@ -176,11 +266,18 @@ internal class Events : Listener {
             return
         }
 
+        // The in game death message is still rewritten below even when the world reports nowhere.
+        val worldName = event.player.world.name
+        val key = WorldChatSystem.keyForWorld(worldName)
+        val report = reports(worldName, key)
+
         val deathMessage = event.deathMessage()
         if (deathMessage is TextComponent) {
-            scope.launch {
-                discordBridgeLock.read {
-                    discordBridge?.sendEmbed(deathMessage.content(), event.player.uniqueId, 0xFF0000)
+            if (report) {
+                scope.launch {
+                    discordBridgeLock.read {
+                        discordBridge?.sendEmbed(deathMessage.content(), event.player.uniqueId, 0xFF0000, key)
+                    }
                 }
             }
             return
@@ -195,12 +292,16 @@ internal class Events : Listener {
         val newDeathMessage = builder.build()
 
         event.deathMessage(newDeathMessage)
+        if (!report) {
+            return
+        }
         scope.launch {
             discordBridgeLock.read {
                 discordBridge?.sendEmbed(
                     PlainTextComponentSerializer.plainText().serialize(newDeathMessage),
                     event.player.uniqueId,
                     0xFF0000,
+                    key,
                 )
             }
         }
