@@ -46,10 +46,11 @@ internal abstract class ChatSystem {
         val discordPlayerPartString =
             listOfNotNull(prefix, ChatUtil.getPlayerPartString(player, includeSuffix = true)).joinToString(" | ")
 
-        sendDiscordMessage(resolveChatItems(text), discordPlayerPartString, player.uniqueId)
-
+        // This must be above sendDiscordMessage because processText will exit if a disallowed link is sent
         val messageComponent =
             ChatUtil.processText(text, player)?.color(PlayerUtils.getMessageColor(player.uniqueId)) ?: return
+
+        sendDiscordMessage(resolveChatItems(text), discordPlayerPartString, player.uniqueId)
 
         val chatComponent =
             UtilitiesOG.trueogColorize(
